@@ -111,6 +111,20 @@ int main() {
                             perror("execlp failed");
                             exit(1);
                         }
+                    } else if (i == 1) {
+                        // Open a program when Box 2 is clicked
+                        if (fork() == 0) {
+                            execlp("gedit", "gedit", NULL);
+                            perror("execlp failed");
+                            exit(1);
+                        }
+                    } else if (i == 2) {
+                        // Open a terminal and ping Google when Box 3 is clicked
+                        if (fork() == 0) {
+                            execlp("x-terminal-emulator", "x-terminal-emulator", "-e", "ping -c 4 google.com", NULL);
+                            perror("execlp failed");
+                            exit(1);
+                        }
                     }
                 }
             }
