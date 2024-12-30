@@ -131,7 +131,7 @@ int main() {
 
         if (event.type == Expose) {
             // Draw the JPEG logo
-            display_jpeg(display, window, gc, "logo.jpg", window_width / 2 - 100, 20);
+            display_jpeg(display, window, gc, "146908244.jpg", window_width / 2 - 100, 20);
 
             // Draw the main text
             draw_text(display, window, gc, window_width / 2 - 75, 100, "Welcome To Wiibuntu");
