@@ -36,10 +36,14 @@ void draw_png(Display *display, Window window, GC gc, int x, int y, const char *
         return;
     }
 
-    // Read PNG header
-    unsigned char header[8];
+    // Declare the header array
+    unsigned char header[8]; 
+
+    // Read the first 8 bytes of the file
     fread(header, 1, 8, fp);
-    if (png_sig_cmp(header, 0, 8)) {
+
+    // Check if the file is a valid PNG file by comparing the signature
+    if (memcmp(header, "\x89PNG\r\n\x1a\n", 8) != 0) {
         fprintf(stderr, "Error: File is not recognized as a PNG file.\n");
         fclose(fp);
         return;
@@ -69,7 +73,7 @@ void draw_png(Display *display, Window window, GC gc, int x, int y, const char *
     }
 
     png_init_io(png, fp);
-    png_set_sig_bytes(png, 8);
+    png_set_sig_bytes(png, 8); // Inform libpng that we've already read the first 8 bytes
     png_read_info(png, info);
 
     int width = png_get_image_width(png, info);
