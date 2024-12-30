@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #define BOX_COUNT 3
 
@@ -103,6 +104,14 @@ int main() {
                 if (x >= boxes[i].x && x <= boxes[i].x + boxes[i].width &&
                     y >= boxes[i].y && y <= boxes[i].y + boxes[i].height) {
                     printf("Box %d clicked: %s\n", i + 1, boxes[i].text);
+                    if (i == 0) {
+                        // Run the shell script when Box 1 is clicked
+                        if (fork() == 0) {
+                            execlp("x-terminal-emulator", "x-terminal-emulator", "-e", "./script.sh", NULL);
+                            perror("execlp failed");
+                            exit(1);
+                        }
+                    }
                 }
             }
         }
