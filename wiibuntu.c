@@ -1,5 +1,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <jpeglib.h> // Include libjpeg for JPEG support
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -27,12 +28,58 @@ void draw_text_field(Display *display, Window window, GC gc, int x, int y, int w
     draw_text(display, window, gc, x + 10, y + height / 2, placeholder);
 }
 
+// Function to load and display a JPEG image
+void display_jpeg(Display *display, Window window, GC gc, const char *filename, int x, int y) {
+    FILE *jpeg_file = fopen(filename, "rb");
+    if (!jpeg_file) {
+        fprintf(stderr, "Failed to open JPEG file: %s\n", filename);
+        return;
+    }
+
+    // Decompress JPEG
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_decompress(&cinfo);
+    jpeg_stdio_src(&cinfo, jpeg_file);
+    jpeg_read_header(&cinfo, TRUE);
+    jpeg_start_decompress(&cinfo);
+
+    int width = cinfo.output_width;
+    int height = cinfo.output_height;
+    int pixel_size = cinfo.output_components;
+
+    unsigned char *image_data = malloc(width * height * pixel_size);
+    unsigned char *row_pointer = image_data;
+
+    while (cinfo.output_scanline < height) {
+        jpeg_read_scanlines(&cinfo, &row_pointer, 1);
+        row_pointer += width * pixel_size;
+    }
+
+    jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+    fclose(jpeg_file);
+
+    // Convert to XImage
+    XImage *ximage = XCreateImage(display, DefaultVisual(display, 0), DefaultDepth(display, 0),
+                                  ZPixmap, 0, (char *)image_data, width, height, 32, 0);
+
+    // Display the image
+    XPutImage(display, window, gc, ximage, 0, 0, x, y, width, height);
+
+    // Free resources
+    ximage->data = NULL; // Prevent XDestroyImage from freeing our data
+    XDestroyImage(ximage);
+    free(image_data);
+}
+
 int main() {
     Display *display;
     Window window;
     XEvent event;
     int screen;
-    
+
     // Open connection to X server
     display = XOpenDisplay(NULL);
     if (display == NULL) {
@@ -83,8 +130,8 @@ int main() {
         XNextEvent(display, &event);
 
         if (event.type == Expose) {
-            // Draw the logo area
-            draw_text(display, window, gc, window_width / 2 - 50, 50, "[Logo Here]");
+            // Draw the JPEG logo
+            display_jpeg(display, window, gc, "logo.jpg", window_width / 2 - 100, 20);
 
             // Draw the main text
             draw_text(display, window, gc, window_width / 2 - 75, 100, "Welcome To Wiibuntu");
