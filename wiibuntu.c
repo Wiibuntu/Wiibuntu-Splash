@@ -1,10 +1,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <jpeglib.h> // Include libjpeg for JPEG support
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <png.h> // Include libpng
 
 #define BOX_COUNT 3
 
@@ -28,50 +28,91 @@ void draw_text_field(Display *display, Window window, GC gc, int x, int y, int w
     draw_text(display, window, gc, x + 10, y + height / 2, placeholder);
 }
 
-// Function to load and display a JPEG image
-void display_jpeg(Display *display, Window window, GC gc, const char *filename, int x, int y) {
-    FILE *jpeg_file = fopen(filename, "rb");
-    if (!jpeg_file) {
-        fprintf(stderr, "Failed to open JPEG file: %s\n", filename);
+// Function to load and display a PNG file
+void draw_png(Display *display, Window window, GC gc, int x, int y, const char *filename) {
+    FILE *fp = fopen(filename, "rb");
+    if (!fp) {
+        fprintf(stderr, "Error: Unable to open PNG file: %s\n", filename);
         return;
     }
 
-    // Decompress JPEG
-    struct jpeg_decompress_struct cinfo;
-    struct jpeg_error_mgr jerr;
-    cinfo.err = jpeg_std_error(&jerr);
-    jpeg_create_decompress(&cinfo);
-    jpeg_stdio_src(&cinfo, jpeg_file);
-    jpeg_read_header(&cinfo, TRUE);
-    jpeg_start_decompress(&cinfo);
-
-    int width = cinfo.output_width;
-    int height = cinfo.output_height;
-    int pixel_size = cinfo.output_components;
-
-    unsigned char *image_data = malloc(width * height * pixel_size);
-    unsigned char *row_pointer = image_data;
-
-    while (cinfo.output_scanline < height) {
-        jpeg_read_scanlines(&cinfo, &row_pointer, 1);
-        row_pointer += width * pixel_size;
+    // Read PNG header
+    unsigned char header[8];
+    fread(header, 1, 8, fp);
+    if (png_sig_cmp(header, 0, 8)) {
+        fprintf(stderr, "Error: File is not recognized as a PNG file.\n");
+        fclose(fp);
+        return;
     }
 
-    jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-    fclose(jpeg_file);
+    // Initialize PNG structures
+    png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!png) {
+        fprintf(stderr, "Error: png_create_read_struct failed.\n");
+        fclose(fp);
+        return;
+    }
 
-    // Convert to XImage
-    XImage *ximage = XCreateImage(display, DefaultVisual(display, 0), DefaultDepth(display, 0),
-                                  ZPixmap, 0, (char *)image_data, width, height, 32, 0);
+    png_infop info = png_create_info_struct(png);
+    if (!info) {
+        fprintf(stderr, "Error: png_create_info_struct failed.\n");
+        png_destroy_read_struct(&png, NULL, NULL);
+        fclose(fp);
+        return;
+    }
 
-    // Display the image
-    XPutImage(display, window, gc, ximage, 0, 0, x, y, width, height);
+    if (setjmp(png_jmpbuf(png))) {
+        fprintf(stderr, "Error: setjmp failed.\n");
+        png_destroy_read_struct(&png, &info, NULL);
+        fclose(fp);
+        return;
+    }
 
-    // Free resources
-    ximage->data = NULL; // Prevent XDestroyImage from freeing our data
-    XDestroyImage(ximage);
-    free(image_data);
+    png_init_io(png, fp);
+    png_set_sig_bytes(png, 8);
+    png_read_info(png, info);
+
+    int width = png_get_image_width(png, info);
+    int height = png_get_image_height(png, info);
+    png_byte color_type = png_get_color_type(png, info);
+    png_byte bit_depth = png_get_bit_depth(png, info);
+
+    // Update PNG info
+    png_read_update_info(png, info);
+
+    // Allocate memory for the image
+    png_bytep *row_pointers = (png_bytep *)malloc(sizeof(png_bytep) * height);
+    for (int i = 0; i < height; i++) {
+        row_pointers[i] = (png_byte *)malloc(png_get_rowbytes(png, info));
+    }
+
+    png_read_image(png, row_pointers);
+
+    // Create an XImage and copy the PNG data to it
+    XImage *image = XCreateImage(display, DefaultVisual(display, 0), DefaultDepth(display, 0),
+                                 ZPixmap, 0, malloc(width * height * 4), width, height, 32, 0);
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            png_bytep px = &(row_pointers[i][j * 4]); // Assume RGBA
+            unsigned long pixel = (px[0] << 16) | (px[1] << 8) | px[2];
+            XPutPixel(image, j, i, pixel);
+        }
+    }
+
+    // Draw the image on the window
+    GC image_gc = XCreateGC(display, window, 0, NULL);
+    XPutImage(display, window, image_gc, image, 0, 0, x, y, width, height);
+    XFreeGC(display, image_gc);
+    XDestroyImage(image);
+
+    // Free memory
+    for (int i = 0; i < height; i++) {
+        free(row_pointers[i]);
+    }
+    free(row_pointers);
+    png_destroy_read_struct(&png, &info, NULL);
+    fclose(fp);
 }
 
 int main() {
@@ -130,8 +171,8 @@ int main() {
         XNextEvent(display, &event);
 
         if (event.type == Expose) {
-            // Draw the JPEG logo
-            display_jpeg(display, window, gc, "146908244.jpg", window_width / 2 - 100, 20);
+            // Draw the PNG logo
+            draw_png(display, window, gc, window_width / 2 - 50, 20, "146908244.png");
 
             // Draw the main text
             draw_text(display, window, gc, window_width / 2 - 75, 100, "Welcome To Wiibuntu");
