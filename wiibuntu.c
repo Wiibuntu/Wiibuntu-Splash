@@ -21,6 +21,11 @@ void draw_box(Display *display, Window window, GC gc, Box box) {
     draw_text(display, window, gc, box.x + 10, box.y + box.height / 2, box.text);
 }
 
+void draw_text_field(Display *display, Window window, GC gc, int x, int y, int width, int height, const char *placeholder) {
+    XDrawRectangle(display, window, gc, x, y, width, height);
+    draw_text(display, window, gc, x + 10, y + height / 2, placeholder);
+}
+
 int main() {
     Display *display;
     Window window;
@@ -65,6 +70,13 @@ int main() {
         {3 * window_width / 4 - 150, window_height / 2, 150, 50, "Option 3"}
     };
 
+    // Text field dimensions
+    int text_field_width = 200;
+    int text_field_height = 30;
+    int text_field_x = (window_width - text_field_width) / 2;
+    int text_field_y = window_height / 3;
+    const char *placeholder = "Enter text here...";
+
     // Event loop
     while (1) {
         XNextEvent(display, &event);
@@ -75,6 +87,9 @@ int main() {
 
             // Draw the main text
             draw_text(display, window, gc, window_width / 2 - 75, 100, "Welcome To Wiibuntu");
+
+            // Draw the text field
+            draw_text_field(display, window, gc, text_field_x, text_field_y, text_field_width, text_field_height, placeholder);
 
             // Draw boxes
             for (int i = 0; i < BOX_COUNT; i++) {
