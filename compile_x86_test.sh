@@ -1,5 +1,4 @@
 #!/bin/bash
-mkdir deb
 cd deb
 mkdir usr
 cd usr
