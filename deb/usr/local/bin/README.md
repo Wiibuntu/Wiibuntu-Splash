@@ -1,2 +1,0 @@
-# Wiibuntu Splash
- 
