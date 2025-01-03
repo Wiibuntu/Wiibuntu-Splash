@@ -12,7 +12,7 @@ void on_deb_download(GtkWidget *widget, gpointer data) {
     system(command);
 }
 
-void create_page(GtkWidget *notebook, const char *text, const char *image_path) {
+void create_page(GtkWidget *notebook, const char *text, const char *image_path, const char *page_name) {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *label = gtk_label_new(text);
     GtkWidget *image = gtk_image_new_from_file(image_path);
@@ -20,7 +20,7 @@ void create_page(GtkWidget *notebook, const char *text, const char *image_path) 
     gtk_box_pack_start(GTK_BOX(box), image, TRUE, TRUE, 5);
     gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), box, gtk_label_new("Page"));
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), box, gtk_label_new(page_name));
 }
 
 int main(int argc, char *argv[]) {
@@ -34,9 +34,9 @@ int main(int argc, char *argv[]) {
     GtkWidget *notebook = gtk_notebook_new();
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
-    create_page(notebook, "Welcome to Wiibuntu", "placeholder1.png");
-    create_page(notebook, "Feature Overview", "placeholder2.png");
-    create_page(notebook, "Getting Started", "placeholder3.png");
+    create_page(notebook, "Welcome to Wiibuntu", "placeholder1.png", "Welcome");
+    create_page(notebook, "Feature Overview", "placeholder2.png", "Overview");
+    create_page(notebook, "Getting Started", "placeholder3.png", "Start");
 
     GtkWidget *final_page = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *final_label = gtk_label_new("Thank you for installing Wiibuntu. Choose an option below:");
