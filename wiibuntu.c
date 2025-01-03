@@ -34,9 +34,9 @@ int main(int argc, char *argv[]) {
     GtkWidget *notebook = gtk_notebook_new();
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
-    create_page(notebook, "Welcome to Wiibuntu", "146908244.png", "Welcome");
-    create_page(notebook, "Feature Overview", "what-is.jpg", "Overview");
-    create_page(notebook, "More Distros", "221247.png", "Distros");
+    create_page(notebook, "Welcome to Wiibuntu", "./images/146908244.png", "Welcome");
+    create_page(notebook, "Feature Overview", "./images/what-is.jpg", "Overview");
+    create_page(notebook, "More Distros", "./images/221247.png", "Distros");
 
     GtkWidget *final_page = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *final_label = gtk_label_new("Thank you for installing Wiibuntu. Choose an option below:");
