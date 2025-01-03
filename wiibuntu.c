@@ -27,16 +27,16 @@ int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Splash Screen");
+    gtk_window_set_title(GTK_WINDOW(window), "Wiibuntu Splash");
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     GtkWidget *notebook = gtk_notebook_new();
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
-    create_page(notebook, "Welcome to Wiibuntu", "placeholder1.png", "Welcome");
-    create_page(notebook, "Feature Overview", "placeholder2.png", "Overview");
-    create_page(notebook, "Getting Started", "placeholder3.png", "Start");
+    create_page(notebook, "Welcome to Wiibuntu", "146908244.png", "Welcome");
+    create_page(notebook, "Feature Overview", "what-is.jpg", "Overview");
+    create_page(notebook, "More Distros", "221247.png", "Distros");
 
     GtkWidget *final_page = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *final_label = gtk_label_new("Thank you for installing Wiibuntu. Choose an option below:");
