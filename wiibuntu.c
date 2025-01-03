@@ -12,16 +12,25 @@ void on_deb_download(GtkWidget *widget, gpointer data) {
     system(command);
 }
 
+GtkWidget *create_image_or_placeholder(const char *image_path) {
+    GtkWidget *image = gtk_image_new_from_file(image_path);
+    if (!gtk_image_get_pixbuf(GTK_IMAGE(image))) {
+        return gtk_label_new("Image not found");
+    }
+    return image;
+}
+
 void create_page(GtkWidget *notebook, const char *text, const char *image_path, const char *page_name) {
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *label = gtk_label_new(text);
-    GtkWidget *image = gtk_image_new_from_file(image_path);
+    GtkWidget *image = create_image_or_placeholder(image_path);
 
     gtk_box_pack_start(GTK_BOX(box), image, TRUE, TRUE, 5);
     gtk_box_pack_start(GTK_BOX(box), label, TRUE, TRUE, 5);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), box, gtk_label_new(page_name));
 }
+
 
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
@@ -34,9 +43,9 @@ int main(int argc, char *argv[]) {
     GtkWidget *notebook = gtk_notebook_new();
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
-    create_page(notebook, "Welcome to Wiibuntu", "./images/146908244.png", "Welcome");
-    create_page(notebook, "Feature Overview", "./images/what-is.jpg", "Overview");
-    create_page(notebook, "More Distros", "./images/221247.png", "Distros");
+    create_page(notebook, "Welcome to Wiibuntu", "images/146908244.png", "Welcome");
+    create_page(notebook, "Feature Overview", "images/what-is.jpg", "Overview");
+    create_page(notebook, "More Distros", "images/221247.png", "Distros");
 
     GtkWidget *final_page = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *final_label = gtk_label_new("Thank you for installing Wiibuntu. Choose an option below:");
