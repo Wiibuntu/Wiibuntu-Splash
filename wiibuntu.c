@@ -43,15 +43,15 @@ int main(int argc, char *argv[]) {
     GtkWidget *notebook = gtk_notebook_new();
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
-    create_page(notebook, "Welcome to Wiibuntu", "images/146908244.png", "Welcome");
-    create_page(notebook, "Feature Overview", "images/what-is.jpg", "Overview");
-    create_page(notebook, "More Distros", "images/221247.png", "Distros");
+    create_page(notebook, "Welcome to Wiibuntu", "./images/146908244.png", "Welcome");
+    create_page(notebook, "Feature Overview", "./images/what-is.jpg", "Overview");
+    create_page(notebook, "More Distros", "./images/221247.png", "Distros");
 
     GtkWidget *final_page = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget *final_label = gtk_label_new("Thank you for installing Wiibuntu. Choose an option below:");
     GtkWidget *final_image = gtk_image_new_from_file("placeholder4.png");
     GtkWidget *web_button = gtk_button_new_with_label("Visit Website");
-    GtkWidget *deb_button = gtk_button_new_with_label("Download .deb Installer");
+    GtkWidget *deb_button = gtk_button_new_with_label("Download Wiibuntu App Manager");
 
     g_signal_connect(web_button, "clicked", G_CALLBACK(on_link_clicked), "https://example.com");
     g_signal_connect(deb_button, "clicked", G_CALLBACK(on_deb_download), "https://example.com/download/package.deb");
