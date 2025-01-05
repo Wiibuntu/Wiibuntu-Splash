@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *web_button = gtk_button_new_with_label("Visit Website");
     GtkWidget *deb_button = gtk_button_new_with_label("Download Wiibuntu App Manager");
 
-    g_signal_connect(web_button, "clicked", G_CALLBACK(on_link_clicked), "https://example.com");
+    g_signal_connect(web_button, "clicked", G_CALLBACK(on_link_clicked), "https://wiibuntu.github.io/Ubuntu/");
     g_signal_connect(deb_button, "clicked", G_CALLBACK(on_deb_download), "https://example.com/download/package.deb");
 
     gtk_box_pack_start(GTK_BOX(final_page), final_image, TRUE, TRUE, 5);
